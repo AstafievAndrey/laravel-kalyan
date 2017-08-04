@@ -24,7 +24,7 @@ class ShopController extends Controller
     );
     
     /**
-     * Display a listing of the resource.
+     * Список заведений
      *
      * @return \Illuminate\Http\Response
      */
@@ -38,7 +38,7 @@ class ShopController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Показываем форму для создания заведения
      *
      * @return \Illuminate\Http\Response
      */
@@ -60,7 +60,8 @@ class ShopController extends Controller
         ];
     }
     
-    public function rus2translit($string) {
+    public function rus2translit($string) 
+    {
         $converter = array(
             'а' => 'a',   'б' => 'b',   'в' => 'v',
             'г' => 'g',   'д' => 'd',   'е' => 'e',
@@ -95,7 +96,7 @@ class ShopController extends Controller
     
 
     /**
-     * Store a newly created resource in storage.
+     * Сохраним в бд.
      *
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
@@ -181,14 +182,18 @@ class ShopController extends Controller
     }
 
     /**
-     * Show the form for editing the specified resource.
+     * Покажем форму для редактирования.
      *
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
     public function edit($id)
     {
-        //
+        return view('shop.edit',[
+                    "shop"=>Shop::find($id),
+                    "cities"=>  City::all(),
+                    "days_week"=>$this->days_week
+                ]);
     }
 
     /**
@@ -200,7 +205,7 @@ class ShopController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        var_dump($request->all(), $id);
     }
 
     /**

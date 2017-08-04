@@ -16,7 +16,7 @@
                         <form class="form-inline" action="{{ url('shop/'.$shop->id) }}" method="POST">
                             {{ method_field('delete') }}
                             <input type="hidden" name="_token" value="{{ csrf_token() }}">
-                            <a href="#" class="btn btn-primary btn-xs">Редактировать</a>
+                            <a href="{{ url('shop/'.$shop->id.'/edit') }}" class="btn btn-primary btn-xs">Редактировать</a>
                             <button type="submit" class="btn btn-danger btn-xs">Удалить</button>
                         </form>
                     </div>

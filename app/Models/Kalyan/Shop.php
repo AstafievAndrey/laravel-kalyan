@@ -16,10 +16,16 @@ class Shop extends Model
     
     public function city()
     {
-        return $this->belongsTo('App\Models\City');
+        return $this->belongsTo('App\Models\Kalyan\City');
     }
     
-    public function shedule(){
+    public function logo()
+    {
+        return $this->belongsTo('App\Models\Kalyan\File','file_id','id');
+    }
+
+    public function shedule()
+    {
         return $this->hasMany('App\Models\Kalyan\Shedule');
     }
 }

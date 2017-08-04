@@ -15,7 +15,7 @@
                             <?php echo e(method_field('delete')); ?>
 
                             <input type="hidden" name="_token" value="<?php echo e(csrf_token()); ?>">
-                            <a href="#" class="btn btn-primary btn-xs">Редактировать</a>
+                            <a href="<?php echo e(url('shop/'.$shop->id.'/edit')); ?>" class="btn btn-primary btn-xs">Редактировать</a>
                             <button type="submit" class="btn btn-danger btn-xs">Удалить</button>
                         </form>
                     </div>
