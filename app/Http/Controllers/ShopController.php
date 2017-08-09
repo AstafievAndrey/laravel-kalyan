@@ -31,9 +31,10 @@ class ShopController extends Controller
     public function index()
     {
         return view('shop.index',[
-                    "shops"=>Shop::where('user_id',  Auth::id())
-                                ->orderBy('id','desc')
-                                ->paginate(15)
+                    "shops"=>  Auth::user()->hasRole("admin") ? 
+                                    Shop::orderBy('id','desc')->paginate(15)
+                                : Shop::where('user_id',  Auth::id())
+                                        ->orderBy('id','desc')->paginate(15)
                 ]);
     }
 
@@ -94,7 +95,7 @@ class ShopController extends Controller
                 '-');
     }
     
-
+    
     /**
      * Сохраним в бд.
      *
@@ -203,9 +204,92 @@ class ShopController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id) 
     {
-        var_dump($request->all(), $id);
+        $seo_translit = $this->rus2translit(
+                City::find($request->city_id)->name . ' ' . $request->name . ' ' . $request->address[0]['name']
+        );
+        $validator = Validator::make(array_merge($request->all(), array("seo_translit" => $seo_translit, "id" => $id)), [
+                            'name' => 'required|string|max:255',
+                            'phone' => 'required|string|max:255',
+                            'short_desc' => 'required|string|max:255',
+                            'description' => 'required|string',
+                            'address.0.name' => 'required|string',
+                            'address.0.lat' => 'required|string',
+                            'address.0.lon' => 'required|string',
+                            'logo' => 'file|mimes:jpg,png,jpeg',
+                        ], $this->messages());
+
+        $validator->after(function ($validator) {
+            $input = $validator->getData();
+            if (Shop::where([
+                        ['seo_translit', '=', $input['seo_translit']],
+                        ['id', '<>', $input['id']]
+                    ])->first()) {
+                $validator->getMessageBag()->add('translit', 'Возможно такое заведение уже присутствует в бд');
+            }
+        });
+
+        if ($validator->fails()) {
+            return redirect('shop/' . $id . '/edit')->withErrors($validator)->withInput();
+        }
+
+        $shop = Shop::find($id);
+
+        if (!is_null($request->logo)) {
+            $file = new File();
+            $file->name = str_replace('kalyan/', '', $request->logo->store('kalyan', 'public'));
+            $file->organization_id = Auth::id();
+            $file->size = $request->logo->getClientSize();
+            $file->active = true;
+            $file->save();
+
+            $old_file = $shop->file_id;
+            $old_name = $shop->logo->name;
+            $shop->file_id = $file->id;
+            $shop->save();
+            
+            File::find($old_file)->forceDelete();
+            @unlink(storage_path('app/public/kalyan/' . $old_name));
+        }
+
+        $shop->name = $request->name;
+        $shop->site = $request->site;
+        $shop->vk = $request->vk;
+        $shop->inst = $request->inst;
+        $shop->phone = $request->phone;
+        $shop->address = $request->address[0]['name'];
+        $shop->lat = $request->address[0]['lat'];
+        $shop->lon = $request->address[0]['lon'];
+        $shop->city_id = $request->city_id;
+        $shop->organization_id = Auth::id();
+        $shop->user_id = Auth::id();
+        $shop->parking = $request->parking;
+        $shop->alcohol = $request->alcohol;
+        $shop->food = $request->food;
+        $shop->veranda = $request->veranda;
+        $shop->console = $request->console;
+        $shop->board = $request->board;
+        $shop->active = true;
+        $shop->seo_translit = $seo_translit;
+        $shop->short_desc = $request->short_desc;
+        $shop->description = $request->description;
+        $shop->save();
+        
+        Shedule::where('shop_id', '=', $id)->forceDelete();
+
+        foreach ($request->schedule as $key => $value) {
+            $shedule = new Shedule();
+            $shedule->shop_id = $shop->id;
+            $shedule->day_id = $key;
+            $shedule->type_work = $value['type_work'];
+            $shedule->work_begin = isset($value['work_begin']) ? $value['work_begin'] : null;
+            $shedule->work_end = isset($value['work_end']) ? $value['work_end'] : null;
+            $shedule->save();
+            unset($shedule);
+        }
+
+        return redirect('shop/' . $id . '/edit');
     }
 
     /**

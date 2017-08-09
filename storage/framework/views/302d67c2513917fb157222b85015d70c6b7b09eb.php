@@ -37,8 +37,12 @@
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
-                        <li><a href="<?php echo e(url('shop')); ?>">Заведения</a></li>
-                        <li><a href="<?php echo e(url('files')); ?>">Файлы</a></li>
+                        <?php if(!Auth::guest()): ?>
+                            <li><a href="<?php echo e(url('shop')); ?>">Заведения</a></li>
+                            <?php if(Auth::user()->hasRole("admin") ): ?>
+                                <li><a href="<?php echo e(url('files')); ?>">Файлы</a></li>
+                            <?php endif; ?>
+                        <?php endif; ?>
                     </ul>
 
                     <!-- Right Side Of Navbar -->

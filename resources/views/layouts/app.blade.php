@@ -36,8 +36,12 @@
                 <div class="collapse navbar-collapse" id="app-navbar-collapse">
                     <!-- Left Side Of Navbar -->
                     <ul class="nav navbar-nav">
-                        <li><a href="{{ url('shop') }}">Заведения</a></li>
-                        <li><a href="{{ url('files') }}">Файлы</a></li>
+                        @if (!Auth::guest())
+                            <li><a href="{{ url('shop') }}">Заведения</a></li>
+                            @if (Auth::user()->hasRole("admin") )
+                                <li><a href="{{ url('files') }}">Файлы</a></li>
+                            @endif
+                        @endif
                     </ul>
 
                     <!-- Right Side Of Navbar -->
