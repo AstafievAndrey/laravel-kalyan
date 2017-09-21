@@ -72,7 +72,7 @@
                         <a href="{{ url('/home') }}">Главная</a>
                     @else
                         <a href="{{ url('/login') }}">Войти</a>
-                        <!--<a href="{{ url('/register') }}">Register</a>-->
+                        <a href="{{ url('/register') }}">Регистрация</a>
                     @endif
                 </div>
             @endif
